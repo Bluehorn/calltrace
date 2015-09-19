@@ -1,16 +1,19 @@
 # -*- coding: utf-8 -*-
 
-from setuptools import setup, find_packages
+from setuptools import setup, find_packages, Extension
 from codecs import open
 from os import path
 
 here = path.abspath(path.dirname(__file__))
+
+calltrace_extension = Extension("calltrace", sources=["calltrace/calltrace_module.c"])
 
 setup(
     name='calltrace',
     version='0.0.1',
 
     description='A sample Python project',
+    ext_modules = [calltrace_extension],
 
     author='Torsten Landschoff',
     author_email='torsten@landschoff.net',

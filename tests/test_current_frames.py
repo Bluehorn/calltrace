@@ -16,6 +16,8 @@ try:
 except ImportError:
     import Queue as queue
 
+import calltrace
+
 
 @pytest.fixture
 def short_checkinterval(request):
@@ -45,7 +47,8 @@ def test_current_frames_breaks_unref(short_checkinterval):
     t0 = time.time()
     try:
         while time.time() < t0 + RUNTIME_SECONDS:
-            sys._current_frames()
+            # sys._current_frames()
+            calltrace.current_frames()
             try:
                 error = bad_unrefs_queue.get(block=False)
                 print("bad unref: {0}".format(error))
