@@ -29,14 +29,18 @@ def short_checkinterval(request):
     sys.setcheckinterval(0)
     request.addfinalizer(lambda: sys.setcheckinterval(old_interval))
 
-
-def test_current_frames_breaks_unref(short_checkinterval):
+@pytest.mark.parametrize(("function_name",), [
+        pytest.mark.xfail(("sys._current_frames",)),
+        ("calltrace.current_frames",)])
+def test_current_frames_breaks_unref(function_name, short_checkinterval):
     """
     Illustrates how just calling sys._current_frames can cause problems by
     pulling stack frames to other threads and destructing objects from there.
     """
     RUNTIME_SECONDS = 1
     bad_unrefs_queue = queue.Queue()
+
+    function = eval(function_name)
 
     stop_event = threading.Event()
     worker = threading.Thread(target=_worker_thread,
@@ -47,8 +51,7 @@ def test_current_frames_breaks_unref(short_checkinterval):
     t0 = time.time()
     try:
         while time.time() < t0 + RUNTIME_SECONDS:
-            # sys._current_frames()
-            calltrace.current_frames()
+            function()
             try:
                 error = bad_unrefs_queue.get(block=False)
                 print("bad unref: {0}".format(error))
@@ -60,7 +63,7 @@ def test_current_frames_breaks_unref(short_checkinterval):
         worker.join()
 
     print("Deallocations on wrong thread: {}".format(errors))
-    assert errors > 0
+    assert errors == 0
 
 
 def _worker_thread(stop_event, bad_unrefs_queue):

@@ -17,6 +17,9 @@ static PyMethodDef calltrace_methods[] = {
 };
 
 #ifdef PyModuleDef_HEAD_INIT
+
+/* Python 3 way of setting up the module */
+
 static PyModuleDef calltrace_module = {
     PyModuleDef_HEAD_INIT,
     "calltrace",
@@ -35,6 +38,8 @@ PyInit_calltrace(void)
 }
 
 #else
+
+/* Python 2 way of setting up the module */
 
 PyMODINIT_FUNC
 initcalltrace(void)
