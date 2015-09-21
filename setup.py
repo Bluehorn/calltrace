@@ -32,7 +32,7 @@ setup(
 
     keywords='traceback stacktrace _current_frames',
     packages=find_packages(exclude=['contrib', 'docs', 'tests*']),
-    install_requires=['peppercorn'],
+    install_requires=[],
 
     extras_require={
         'test': ['pytest'],
