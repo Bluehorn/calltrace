@@ -1,11 +1,38 @@
 #include "Python.h"
+#include "frameobject.h"  /* need access to PyFrameObject, that's why */
+
+#include <stddef.h>
+
+#include "framedata.c"
+#include "calltrace.c"
+
+#ifndef Py_SIZE
+#define Py_SIZE(o)	(o->ob_size)
+#endif
+
 
 static PyObject *
 calltrace_current_frames(PyObject *dummy, PyObject *args)
 {
     PyObject *frames = _PyThread_CurrentFrames();
-    Py_XDECREF(frames);
-    Py_RETURN_NONE;
+    PyObject *thread, *frame;
+    Py_ssize_t pos = 0;
+
+    while (PyDict_Next(frames, &pos, &thread, &frame)) {
+        PyObject *call_trace = (PyObject *) CallTrace_from_frame((PyFrameObject*) frame);
+        if (call_trace == NULL) {
+            Py_DECREF(frames);
+            return NULL;
+        }
+        if (PyDict_SetItem(frames, thread, call_trace) < 0) {
+            Py_DECREF(call_trace);
+            Py_DECREF(frames);
+            return NULL;
+        }
+        Py_DECREF(call_trace);
+    }
+
+    return frames;
 }
 
 static const char module_doc[] = "Extract call traces without frame information";
