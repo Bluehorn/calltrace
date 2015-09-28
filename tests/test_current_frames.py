@@ -54,7 +54,7 @@ def test_current_frames_breaks_unref(function_name, short_checkinterval):
             function()
             try:
                 error = bad_unrefs_queue.get(block=False)
-                print("bad unref: {0}".format(error))
+                print("bad unref: %s" % (error,))
                 errors += 1
             except queue.Empty:
                 pass
@@ -62,7 +62,7 @@ def test_current_frames_breaks_unref(function_name, short_checkinterval):
         stop_event.set()
         worker.join()
 
-    print("Deallocations on wrong thread: {}".format(errors))
+    print("Deallocations on wrong thread: %s" % (errors,))
     assert errors == 0
 
 
