@@ -19,3 +19,16 @@ static inline void clear_frame_data(FrameData *frame_data)
     Py_XDECREF(frame_data->f_code);
     frame_data->f_code = NULL;
 }
+
+static inline
+PyObject *frame_data_as_tuple(FrameData *frame_data)
+{
+    PyCodeObject *code = frame_data->f_code;
+    PyObject *filename = code->co_filename;
+    PyObject *function = code->co_name;
+    int l = PyCode_Addr2Line(code, frame_data->f_lasti);
+    PyObject *lineno = PyInt_FromLong(l);
+    if (!lineno)
+        return NULL;
+    return PyTuple_Pack(4, filename, lineno, function, Py_None);
+}
