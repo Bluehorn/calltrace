@@ -10,6 +10,10 @@
 #define Py_SIZE(o)          (o->ob_size)
 #endif
 
+#if PY_MAJOR_VERSION < 3
+#define PyLong_FromLong(x)  PyInt_FromLong(x)
+#endif
+
 
 static PyObject *
 calltrace_current_frames(PyObject *dummy, PyObject *args)

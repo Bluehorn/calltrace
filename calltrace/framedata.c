@@ -27,7 +27,7 @@ PyObject *frame_data_as_tuple(FrameData *frame_data)
     PyObject *filename = code->co_filename;
     PyObject *function = code->co_name;
     int l = PyCode_Addr2Line(code, frame_data->f_lasti);
-    PyObject *lineno = PyInt_FromLong(l);
+    PyObject *lineno = PyLong_FromLong(l);
     if (!lineno)
         return NULL;
     return PyTuple_Pack(4, filename, lineno, function, Py_None);
