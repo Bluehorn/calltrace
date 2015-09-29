@@ -65,10 +65,11 @@ register_CallTrace_type(PyObject *module)
 
 static PyModuleDef calltrace_module = {
     PyModuleDef_HEAD_INIT,
-    "calltrace",
-    module_doc,
-    0,
-    calltrace_methods, NULL, NULL, NULL, NULL
+
+    .m_name = "calltrace",
+    .m_doc = module_doc,
+    .m_size = 0,
+    .m_methods = calltrace_methods,
 };
 
 
