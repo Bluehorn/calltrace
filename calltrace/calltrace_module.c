@@ -3,17 +3,41 @@
 
 #include <stddef.h>
 
-#include "framedata.c"
-#include "calltrace.c"
-
 #ifndef Py_SIZE
 #define Py_SIZE(o)          (o->ob_size)
 #endif
 
-#if PY_MAJOR_VERSION < 3
+
+typedef struct {
+    /* Reference to linecache module, initialized with module. */
+    PyObject *linecache_mod;
+} calltrace_state_t;
+
+
+#if PY_MAJOR_VERSION >= 3
+
+static PyModuleDef calltrace_module;
+
+static inline calltrace_state_t *
+calltrace_state()
+{
+    return PyModule_GetState(PyState_FindModule(&calltrace_module));
+}
+
+#else
+
+static inline calltrace_state_t *
+calltrace_state()
+{
+    static calltrace_state_t global_state;
+    return &global_state;
+}
+
 #define PyLong_FromLong(x)  PyInt_FromLong(x)
 #endif
 
+#include "framedata.c"
+#include "calltrace.c"
 
 static PyObject *
 calltrace_current_frames(PyObject *dummy, PyObject *args)
@@ -58,6 +82,13 @@ register_CallTrace_type(PyObject *module)
     return PyModule_AddObject(module, "CallTrace", (PyObject *)&CallTraceType);
 }
 
+static int
+calltrace_init(calltrace_state_t *state)
+{
+    state->linecache_mod = PyImport_ImportModule("linecache");
+    return state->linecache_mod ? 0 : -1;
+}
+
 
 #ifdef PyModuleDef_HEAD_INIT
 
@@ -68,7 +99,7 @@ static PyModuleDef calltrace_module = {
 
     .m_name = "calltrace",
     .m_doc = module_doc,
-    .m_size = 0,
+    .m_size = sizeof(calltrace_state_t),
     .m_methods = calltrace_methods,
 };
 
@@ -77,11 +108,18 @@ PyMODINIT_FUNC
 PyInit_calltrace(void)
 {
     PyObject *module;
+    calltrace_state_t *state;
+
     module = PyModule_Create(&calltrace_module);
     if (!module)
         return NULL;
     if (register_CallTrace_type(module) < 0)
         goto error;
+
+    state = PyModule_GetState(module);
+    if (calltrace_init(state) < 0)
+        goto error;
+
     return module;
 
 error:
@@ -102,10 +140,19 @@ initcalltrace(void)
     if (!module)
         return;
 
-    if (register_CallTrace_type(module) < 0) {
-        Py_DECREF(module);
-        return;
-    }
+    if (register_CallTrace_type(module) < 0)
+        goto error;
+
+    if (calltrace_init(calltrace_state()) < 0)
+        goto error;
+
+    /* err, sure, how does the caller notice we had an error?
+       Checking PyErr_Occurred? */
+    return;
+
+error:
+    Py_DECREF(module);
+    return;
 }
 
 #endif
