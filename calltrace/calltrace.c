@@ -57,6 +57,8 @@ CallTrace_dealloc(CallTraceObject *self)
     for (i = 0; i < Py_SIZE(self); i++) {
         clear_frame_data(&self->frames[i]);
     }
+
+    Py_TYPE(self)->tp_free(self);
 }
 
 static Py_ssize_t
