@@ -10,9 +10,9 @@ calltrace_extension = Extension("calltrace", sources=["calltrace/calltrace_modul
 
 setup(
     name='calltrace',
-    version='0.0.1',
+    version='0.0.2',
 
-    description='A sample Python project',
+    description='sys._current_frames replacement that does not capture local variables',
     ext_modules = [calltrace_extension],
 
     author='Torsten Landschoff',
