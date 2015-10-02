@@ -51,11 +51,12 @@ init:
 
 install:
   - "powershell appveyor\\install.ps1"
+  - "%WITH_COMPILER% %PYTHON%/scripts/pip install .[dev,test]"
 
 build: off
 
 test_script:
-  - "%WITH_COMPILER% %PYTHON%/python setup.py test"
+  - "%WITH_COMPILER% %PYTHON%/scripts/py.test -rsx -v"
 
 after_test:
   - "%WITH_COMPILER% %PYTHON%/python setup.py bdist_wheel"
