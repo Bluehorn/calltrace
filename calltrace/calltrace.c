@@ -81,8 +81,10 @@ CallTrace_item(PyObject *o, Py_ssize_t i)
 
 
 static PySequenceMethods CallTrace_as_sequence = {
-    .sq_length = CallTrace_length,
-    .sq_item = CallTrace_item,
+    CallTrace_length,           /* sq_length */
+    0,                          /* sq_concat */
+    0,                          /* sq_repeat */
+    CallTrace_item,             /* sq_item */
 };
 
 static PyTypeObject CallTraceType = {
