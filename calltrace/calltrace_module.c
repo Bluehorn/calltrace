@@ -103,10 +103,10 @@ calltrace_init(calltrace_state_t *state)
 static PyModuleDef calltrace_module = {
     PyModuleDef_HEAD_INIT,
 
-    .m_name = "calltrace",
-    .m_doc = module_doc,
-    .m_size = sizeof(calltrace_state_t),
-    .m_methods = calltrace_methods,
+    "calltrace",                /* m_name */
+    module_doc,                 /* m_doc */
+    sizeof(calltrace_state_t),  /* m_size */
+    calltrace_methods,          /* m_methods */
 };
 
 
