@@ -3,6 +3,12 @@
 
 #include <stddef.h>
 
+#if defined(_MSC_VER)
+/* Hello MSVC 2008, you had 9 years to implement ISO C99 and especially the
+   inline keyword. */
+#define __inline inline
+#endif
+
 #ifndef Py_SIZE
 #define Py_SIZE(o)          (o->ob_size)
 #endif
