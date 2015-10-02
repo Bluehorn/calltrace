@@ -86,13 +86,44 @@ static PySequenceMethods CallTrace_as_sequence = {
 };
 
 static PyTypeObject CallTraceType = {
-    .tp_name = "calltrace.CallTrace",
-    .tp_basicsize = offsetof(CallTraceObject, frames),
-    .tp_itemsize = sizeof(FrameData),
-    .tp_flags = Py_TPFLAGS_DEFAULT,
-    .tp_free = PyObject_Del,
-    .tp_new = CallTrace_new,
-    .tp_dealloc = (destructor) CallTrace_dealloc,
-    .tp_doc = "Describes a call stack",
-    .tp_as_sequence = &CallTrace_as_sequence,
+    PyVarObject_HEAD_INIT(NULL, 0)
+    "calltrace.CallTrace",                      /* tp_name*/
+    offsetof(CallTraceObject, frames),          /* tp_basicsize */
+    sizeof(FrameData),                          /* tp_itemsize */
+
+    (destructor) CallTrace_dealloc,             /* tp_dealloc */
+    0,                                          /* tp_print */
+    0,                                          /* tp_getattr */
+    0,                                          /* tp_setattr */
+    0,                                          /* tp_compare */
+    0,                                          /* tp_repr */
+    0,                                          /* tp_as_number */
+    &CallTrace_as_sequence,                     /* tp_as_sequence */
+    0,                                          /* tp_as_mapping */
+    0,                                          /* tp_hash */
+    0,                                          /* tp_call */
+    0,                                          /* tp_str */
+    0,                                          /* tp_getattro */
+    0,                                          /* tp_setattro */
+    0,                                          /* tp_as_buffer */
+    Py_TPFLAGS_DEFAULT,                         /* tp_flags */
+    "Describes a call stack",                   /* tp_doc */
+    0,                                          /* tp_traverse */
+    0,                                          /* tp_clear */
+    0,                                          /* tp_richcompare */
+    0,                                          /* tp_weaklistoffset */
+    0,                                          /* tp_iter */
+    0,                                          /* tp_iternext */
+    0,                                          /* tp_methods */
+    0,                                          /* tp_members */
+    0,                                          /* tp_getset */
+    0,                                          /* tp_base */
+    0,                                          /* tp_dict */
+    0,                                          /* tp_descr_get */
+    0,                                          /* tp_descr_set */
+    0,                                          /* tp_dictoffset */
+    0,                                          /* tp_init */
+    0,                                          /* tp_alloc */
+    CallTrace_new,                              /* tp_new */
+    PyObject_Del,                               /* tp_free */
 };
