@@ -25,7 +25,7 @@ typedef struct {
 static PyModuleDef calltrace_module;
 
 static inline calltrace_state_t *
-calltrace_state()
+calltrace_state(void)
 {
     return PyModule_GetState(PyState_FindModule(&calltrace_module));
 }
@@ -33,7 +33,7 @@ calltrace_state()
 #else
 
 static inline calltrace_state_t *
-calltrace_state()
+calltrace_state(void)
 {
     static calltrace_state_t global_state;
     return &global_state;
@@ -45,7 +45,7 @@ calltrace_state()
 typedef struct _CallTrace_struct CallTraceObject;
 typedef struct _FrameInfo_struct FrameInfoObject;
 
-static FrameInfoObject *FrameInfo_from_call_trace(CallTraceObject *, size_t);
+static FrameInfoObject *FrameInfo_from_call_trace(CallTraceObject *, Py_ssize_t);
 
 #include "framedata.c"
 #include "calltrace.c"

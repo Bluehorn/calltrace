@@ -5,21 +5,23 @@ struct _FrameInfo_struct {
     CallTraceObject *call_trace;
 
     /* Index into frames for the exposed frame. */
-    size_t frame_index;
+    Py_ssize_t frame_index;
 };
 
 static PyTypeObject FrameInfoType;
 
 static FrameInfoObject *
-FrameInfo_from_call_trace(CallTraceObject *call_trace, size_t frame_index)
+FrameInfo_from_call_trace(CallTraceObject *call_trace, Py_ssize_t frame_index)
 {
+    FrameInfoObject *self = NULL;
     if (frame_index >= Py_SIZE((PyObject *) call_trace)) {
         PyErr_Format(PyExc_IndexError,
                 "frame index %zu out of range [0..%zd]",
                 frame_index, Py_SIZE((PyObject *) call_trace) - 1);
         return NULL;
     }
-    FrameInfoObject *self = (FrameInfoObject *) FrameInfoType.tp_alloc(&FrameInfoType, 0);
+
+    self = (FrameInfoObject *) FrameInfoType.tp_alloc(&FrameInfoType, 0);
     if (!self)
         return NULL;
 
@@ -33,8 +35,8 @@ static PyObject *
 FrameInfo_get_f_back(FrameInfoObject *self, void *unused_closure)
 {
     CallTraceObject *call_trace = self->call_trace;
-    size_t frame_index = self->frame_index;
-    if (frame_index)
+    Py_ssize_t frame_index = self->frame_index;
+    if (frame_index > 0)
         return FrameInfo_from_call_trace(call_trace, frame_index - 1);
     else
         Py_RETURN_NONE;
