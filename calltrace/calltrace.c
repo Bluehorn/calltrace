@@ -1,11 +1,12 @@
 /* Defines the Python object that represents the whole call trace. Basically,
    this is an array of FrameData entries. */
 
-typedef struct {
+struct _CallTrace_struct {
     PyObject_VAR_HEAD
-    /* Information about all captured frames, ob_size defines length. */
+    /* Information about all captured frames, ob_size defines length.
+       Most recent call (which is the current stack frame) last. */
     FrameData frames[1];
-} CallTraceObject;
+};
 
 static PyTypeObject CallTraceType;
 
@@ -79,6 +80,19 @@ CallTrace_item(PyObject *o, Py_ssize_t i)
     return frame_data_as_tuple(&self->frames[i]);
 }
 
+static PyObject *
+CallTrace_export_frame(PyObject *self, PyObject *unused)
+{
+    size_t top_frame = Py_SIZE((PyObject *) self) - 1;
+    return (PyObject*) FrameInfo_from_call_trace((CallTraceObject *) self, top_frame);
+}
+
+
+static PyMethodDef CallTrace_methods[] = {
+    { "export_frame", (PyCFunction) CallTrace_export_frame, METH_NOARGS,
+        "Return the call trace as a frame-like object." },
+    { NULL }                    /* sentinel */
+};
 
 static PySequenceMethods CallTrace_as_sequence = {
     CallTrace_length,           /* sq_length */
@@ -116,7 +130,7 @@ static PyTypeObject CallTraceType = {
     0,                                          /* tp_weaklistoffset */
     0,                                          /* tp_iter */
     0,                                          /* tp_iternext */
-    0,                                          /* tp_methods */
+    CallTrace_methods,                          /* tp_methods */
     0,                                          /* tp_members */
     0,                                          /* tp_getset */
     0,                                          /* tp_base */

@@ -42,8 +42,14 @@ calltrace_state()
 #define PyLong_FromLong(x)  PyInt_FromLong(x)
 #endif
 
+typedef struct _CallTrace_struct CallTraceObject;
+typedef struct _FrameInfo_struct FrameInfoObject;
+
+static FrameInfoObject *FrameInfo_from_call_trace(CallTraceObject *, size_t);
+
 #include "framedata.c"
 #include "calltrace.c"
+#include "frameinfo.c"
 
 static PyObject *
 calltrace_current_frames(PyObject *dummy, PyObject *args)
@@ -69,19 +75,40 @@ calltrace_current_frames(PyObject *dummy, PyObject *args)
     return frames;
 }
 
+static PyObject *
+calltrace_current_frame(PyObject *dummy, PyObject *unused)
+{
+    PyObject *result = NULL;
+    PyObject *call_trace = PyObject_CallFunction((PyObject*) &CallTraceType, NULL);
+    if (!call_trace)
+        return NULL;
+
+    result = PyObject_CallMethod(call_trace, "export_frame", NULL);
+    Py_DECREF(call_trace);
+    return result;
+}
+
+
 static const char module_doc[] = "Extract call traces without frame information";
 
 static PyMethodDef calltrace_methods[] = {
     {"current_frames", calltrace_current_frames, METH_NOARGS,
      "Replacement for sys._current_frames"},
+    {"current_frame", calltrace_current_frame, METH_NOARGS,
+     "Replaces sys._getframe and returns a frame-like object."},
     {NULL, NULL, 0, NULL}        /* Sentinel */
 };
 
 
 /* Register CallTrace type, return -1 on error or 0 on success. */
 static int
-register_CallTrace_type(PyObject *module)
+register_types(PyObject *module)
 {
+    if (PyType_Ready(&FrameInfoType) < 0)
+        return -1;
+    Py_INCREF(&FrameInfoType);
+    if (PyModule_AddObject(module, "FrameInfo", (PyObject *)&FrameInfoType) < 0)
+        return -1;
     if (PyType_Ready(&CallTraceType) < 0)
         return -1;
     Py_INCREF(&CallTraceType);
@@ -119,7 +146,7 @@ PyInit_calltrace(void)
     module = PyModule_Create(&calltrace_module);
     if (!module)
         return NULL;
-    if (register_CallTrace_type(module) < 0)
+    if (register_types(module) < 0)
         goto error;
 
     state = PyModule_GetState(module);
@@ -146,7 +173,7 @@ initcalltrace(void)
     if (!module)
         return;
 
-    if (register_CallTrace_type(module) < 0)
+    if (register_types(module) < 0)
         goto error;
 
     if (calltrace_init(calltrace_state()) < 0)

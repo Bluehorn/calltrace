@@ -20,6 +20,14 @@ static inline void clear_frame_data(FrameData *frame_data)
     frame_data->f_code = NULL;
 }
 
+/* Extract line number from frame data, returns new reference to int/long. */
+static inline
+PyObject *frame_data_lineno(FrameData *frame_data)
+{
+    PyCodeObject *code = frame_data->f_code;
+    return PyLong_FromLong(PyCode_Addr2Line(code, frame_data->f_lasti));
+}
+
 static inline
 PyObject *frame_data_as_tuple(FrameData *frame_data)
 {
@@ -27,9 +35,8 @@ PyObject *frame_data_as_tuple(FrameData *frame_data)
     PyCodeObject *code = frame_data->f_code;
     PyObject *filename = code->co_filename;
     PyObject *function = code->co_name;
-    int l = PyCode_Addr2Line(code, frame_data->f_lasti);
     int empty = 0;
-    PyObject *lineno = PyLong_FromLong(l);
+    PyObject *lineno = frame_data_lineno(frame_data);
     PyObject *source = NULL, *result = NULL;
 
     if (!lineno)
