@@ -10,7 +10,7 @@ calltrace_extension = Extension("calltrace", sources=["calltrace/calltrace_modul
 
 setup(
     name='calltrace',
-    version='0.0.3',
+    version='0.0.4',
 
     description='sys._current_frames replacement that does not capture local variables',
     ext_modules = [calltrace_extension],
