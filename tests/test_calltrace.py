@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import pytest
 import sys
 import traceback
 from calltrace import CallTrace, current_frame
@@ -39,3 +40,8 @@ def test_export_frame(tmpdir):
     # the new StackExtractor class. Just assume an extra frame is okay when using
     # traceback...
     assert formatted[0] == formatted[1] or formatted[0][:-1] == formatted[1]
+
+
+def test_reject_non_frame():
+    """The first argument to CallTrace must be a frame."""
+    pytest.raises(TypeError, CallTrace, 42)

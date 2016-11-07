@@ -44,7 +44,11 @@ CallTrace_new(PyTypeObject *subtype, PyObject *args, PyObject *kwds)
     if (!PyArg_UnpackTuple(args, "CallTrace", 0, 1, &frame))
         return NULL;
 
-    if (!frame)
+    if (frame) {
+        if (!PyFrame_Check(frame))
+            return PyErr_Format(PyExc_TypeError, "CallTrace.__new__ requires a frame");
+    }
+    else
         frame = (PyObject *) PyThreadState_GET()->frame;
 
     return (PyObject *) CallTrace_from_frame(subtype, (PyFrameObject *) frame);
