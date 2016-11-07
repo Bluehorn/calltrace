@@ -84,6 +84,57 @@ CallTrace_item(PyObject *o, Py_ssize_t i)
     return frame_data_as_tuple(&self->frames[i]);
 }
 
+
+static PyObject *
+CallTrace_subscript(PyObject *self, PyObject *key)
+{
+    if (PyIndex_Check(key))
+    {
+        Py_ssize_t key_value;
+        key_value = PyNumber_AsSsize_t(key, PyExc_IndexError);
+        if (key_value == -1 && PyErr_Occurred())
+            return NULL;
+        if (key_value < 0)
+            key_value += Py_SIZE(self);
+        return CallTrace_item(self, key_value);
+    }
+    else if (PySlice_Check(key))
+    {
+        PyObject *result;
+        Py_ssize_t start, stop, step, slicelength;
+
+        if (PySlice_GetIndicesEx(key, Py_SIZE(self),
+                         &start, &stop, &step, &slicelength) < 0) {
+            return NULL;
+        }
+
+        result = PyTuple_New(slicelength);
+        if (result != NULL) {
+            Py_ssize_t pos, cur = start;
+            for (pos = 0; pos < slicelength; pos++) {
+                PyObject *item = CallTrace_item(self, cur);
+                cur += step;
+
+                if (!item) {
+                    Py_DECREF(result);
+                    result = NULL;
+                    break;
+                }
+
+                PyTuple_SET_ITEM(result, pos, item);
+            }
+        }
+        return result;
+    }
+    else
+    {
+        PyErr_Format(PyExc_TypeError,
+                     "indices must be integers or slices, not %.200s",
+                     key->ob_type->tp_name);
+        return NULL;
+    }
+}
+
 static PyObject *
 CallTrace_export_frame(PyObject *self, PyObject *unused)
 {
@@ -105,6 +156,12 @@ static PySequenceMethods CallTrace_as_sequence = {
     CallTrace_item,             /* sq_item */
 };
 
+static PyMappingMethods CallTrace_as_mapping = {
+    CallTrace_length,           /* mp_length */
+    CallTrace_subscript,        /* mp_subscript */
+};
+
+
 static PyTypeObject CallTraceType = {
     PyVarObject_HEAD_INIT(NULL, 0)
     "calltrace.CallTrace",                      /* tp_name*/
@@ -119,7 +176,7 @@ static PyTypeObject CallTraceType = {
     0,                                          /* tp_repr */
     0,                                          /* tp_as_number */
     &CallTrace_as_sequence,                     /* tp_as_sequence */
-    0,                                          /* tp_as_mapping */
+    &CallTrace_as_mapping,                      /* tp_as_mapping */
     0,                                          /* tp_hash */
     0,                                          /* tp_call */
     0,                                          /* tp_str */

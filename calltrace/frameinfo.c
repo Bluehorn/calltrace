@@ -37,7 +37,7 @@ FrameInfo_get_f_back(FrameInfoObject *self, void *unused_closure)
     CallTraceObject *call_trace = self->call_trace;
     Py_ssize_t frame_index = self->frame_index;
     if (frame_index > 0)
-        return FrameInfo_from_call_trace(call_trace, frame_index - 1);
+        return (PyObject *) FrameInfo_from_call_trace(call_trace, frame_index - 1);
     else
         Py_RETURN_NONE;
 }
