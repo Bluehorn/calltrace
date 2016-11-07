@@ -9,7 +9,6 @@ python:
   - "3.5"
   - "nightly"
 install:
-  - "pip install ."
-  - "pip install pytest"
+  - "pip install '.[dev,test]'"
 # command to run tests
 script: py.test -rsx -v

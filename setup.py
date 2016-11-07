@@ -35,6 +35,6 @@ setup(
     install_requires=[],
 
     extras_require={
-        'test': ['pytest'],
+        'test': ['pytest', 'hypothesis'],
     },
 )
